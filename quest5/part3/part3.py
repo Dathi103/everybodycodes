@@ -29,8 +29,6 @@ while True:
     if not any(new_snapshot == snapshot for snapshot in snapshots):
         snapshots.append(new_snapshot)
         shouts.add(number)
-        if num_rounds % 10000 == 0:
-            print(num_rounds, len(snapshots))
     else:
         print(max(shouts))
         break
