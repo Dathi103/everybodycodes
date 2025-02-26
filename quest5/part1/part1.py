@@ -1,10 +1,7 @@
 import pathlib
 
-with open(pathlib.Path(__file__).parent / 'example.txt') as inf:
-    lines = [
-        list(map(int, line.strip().split())) 
-        for line in inf.readlines()
-    ]
+with open(pathlib.Path(__file__).parent / "example.txt") as inf:
+    lines = [list(map(int, line.strip().split())) for line in inf.readlines()]
 
 columns = [list(col) for col in zip(*lines)]
 
@@ -22,5 +19,4 @@ for _ in range(num_rounds):
 
     current_col = target_column
 
-print(''.join([str(col[0]) for col in columns]))
-    
+print("".join([str(col[0]) for col in columns]))
