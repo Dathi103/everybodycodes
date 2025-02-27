@@ -13,53 +13,62 @@ def calculate_total(plan, track, base_strength=10):
     return total
 
 
-values = {"=": 0, "S": 0, "-": -1, "+": 1}
+def build_track(track_grid, replace_values, n_loops=11):
+    track = []
+    moves = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+    prev_x, prev_y = 1, 0
+    x, y = 0, 0
 
-with open(pathlib.Path(__file__).parent / "track.txt") as inf:
-    track_notes = inf.read().split("\n")
-with open(pathlib.Path(__file__).parent / "plan.txt") as inf:
-    rival_plan = [values[action] for action in inf.read().split(":")[1].split(",")]
+    while True:
 
+        for move_x, move_y in moves:
+            new_x = x + move_x
+            new_y = y + move_y
+            if (
+                0 <= new_x < len(track_grid)
+                and 0 <= new_y < len(track_grid[0])
+                and track_grid[new_x][new_y] != " "
+                and (new_x, new_y) != (prev_x, prev_y)
+            ):
+                prev_x, prev_y = x, y
+                x, y = new_x, new_y
+                break
 
-max_len = max(map(len, track_notes))
-track_grid = [list(line) + [" "] * (max_len - len(line)) for line in track_notes]
+        seg = track_grid[x][y]
+        track.append(replace_values[seg])
 
-track = []
-moves = [(1, 0), (-1, 0), (0, 1), (0, -1)]
-prev_x, prev_y = 1, 0
-x, y = 0, 0
-
-while True:
-
-    for move_x, move_y in moves:
-        new_x = x + move_x
-        new_y = y + move_y
-        if (
-            0 <= new_x < len(track_grid)
-            and 0 <= new_y < len(track_grid[0])
-            and track_grid[new_x][new_y] != " "
-            and (new_x, new_y) != (prev_x, prev_y)
-        ):
-            prev_x, prev_y = x, y
-            x, y = new_x, new_y
+        if seg == "S":
             break
 
-    seg = track_grid[x][y]
-    track.append(values[seg])
+    return track * n_loops
 
-    if seg == "S":
-        break
 
-track = track * 11
+def main():
 
-rival_total = calculate_total(rival_plan, track)
+    values = {"=": 0, "S": 0, "-": -1, "+": 1}
 
-all_plans = set(permutations([1] * 5 + [-1] * 3 + [0] * 3))
+    with open(pathlib.Path(__file__).parent / "track.txt") as inf:
+        track_notes = inf.read().split("\n")
+    with open(pathlib.Path(__file__).parent / "plan.txt") as inf:
+        rival_plan = [values[action] for action in inf.read().split(":")[1].split(",")]
 
-better_plans = 0
-for plan in tqdm(all_plans):
-    total = calculate_total(plan, track)
-    if total > rival_total:
-        better_plans += 1
+    max_len = max(map(len, track_notes))
+    track_grid = [list(line) + [" "] * (max_len - len(line)) for line in track_notes]
 
-print(better_plans)
+    track = build_track(track_grid, values)
+
+    rival_total = calculate_total(rival_plan, track)
+
+    all_plans = set(permutations([1] * 5 + [-1] * 3 + [0] * 3))
+
+    n_better_plans = 0
+    for plan in tqdm(all_plans):
+        total = calculate_total(plan, track)
+        if total > rival_total:
+            n_better_plans += 1
+
+    print(n_better_plans)
+
+
+if __name__ == "__main__":
+    main()
